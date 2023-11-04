@@ -346,6 +346,13 @@ class StoreApp extends OAuth2App {
       .then((
         res: any,
       ) => res.json()).catch((e: any) => console.log(e));
+
+    await this._cloudHomeyApi?.apps.updateApp({
+      id,
+      app: {
+        "origin": "devkit_install",
+      } as any,
+    });
     console.log(postResponse);
   }
 
