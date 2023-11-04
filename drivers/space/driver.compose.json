@@ -1,0 +1,16 @@
+{
+    "name": {
+        "en": "Space"
+    },
+    "class": "other",
+    "connectivity": [
+        "cloud",
+        "lan"
+    ],
+    "platforms": [
+        "local"
+    ],
+    "capabilities": [
+        "alarm_generic"
+    ]
+}

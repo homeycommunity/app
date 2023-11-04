@@ -1,0 +1,40 @@
+{
+  "id": "space.homeycommunity.app",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Homey Community Space"
+  },
+  "description": {
+    "en": "Adds support for the Homey Community Space."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:api"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Dominic Vonk",
+    "email": "do@vonk.io"
+  },
+  "api": {
+    "getLogin": {
+      "method": "get",
+      "path": "/login/"
+    },
+    "postLogin": {
+      "method": "post",
+      "path": "/login/"
+    }
+  }
+}
