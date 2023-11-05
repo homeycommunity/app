@@ -25,7 +25,7 @@ jobs:
         run: npx homey app build
 
       - name: Make tarball
-        run: cd .homeybuild && tar -czf homeycommunityspace.tar.gz . && mv homeycommunityspace.tar.gz ..
+        run: tar -czf homeycommunityspace.tar.gz -C .homeybuild .
 
       - name: Release
         uses: fnkr/github-action-ghr@v1
