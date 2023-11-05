@@ -193,7 +193,6 @@ class StoreApp extends OAuth2App {
       return;
     }
     this.homeyId = await this.homey.cloud.getHomeyId();
-    console.log("get homey token");
     const res: any = await got
       .get(
         `${this.hcsServer}/api/hcs/homey-token/` +
@@ -205,7 +204,6 @@ class StoreApp extends OAuth2App {
         },
       )
       .json();
-    console.log(res.token);
     this.token = res.token;
 
     this._api = new AthomCloudAPI({
@@ -217,7 +215,6 @@ class StoreApp extends OAuth2App {
 
     this._homeyApi = await HomeyAPI.forCurrentHomey(this.homey);
 
-    console.log("1");
     this._api.setToken({
       access_token: res.token,
       refresh_token: res.token,
@@ -229,7 +226,6 @@ class StoreApp extends OAuth2App {
     this._cloudHomey = await this._cloudUser.getHomeyById(this.homeyId);
     this._cloudHomeyApi = await this._cloudHomey.authenticate();
 
-    console.log("3");
     // await HomeyAPI.forCurrentHomey(this.homey, res.token);
     if (await this._homeyApi.hasScope("homey:manager:devkit")) {
       console.log("has devkit scope");
@@ -247,8 +243,10 @@ class StoreApp extends OAuth2App {
           key: this.eventKey!,
           channel: "homey/" + this.homeyId,
         })
+        .on("error", (err) => console.log(err))
         .on("message", (msg: EmitterMessage) => {
           const output = JSON.parse(msg.asString());
+          console.log(output);
           this.downloadApp(output.app, output.version);
         });
     }
@@ -333,7 +331,11 @@ class StoreApp extends OAuth2App {
       contentType: "octet/stream",
     });
     form.append("debug", "false");
-    form.append("env", env);
+    if (env) {
+      form.append("env", env);
+    } else {
+      form.append("env", "{}");
+    }
     form.append("purgeSettings", "false");
 
     const postResponse = await fetch(`http://${ip}/api/manager/devkit`, {
