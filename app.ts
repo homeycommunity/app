@@ -32,8 +32,10 @@ class StoreApp extends OAuth2App {
       secure: true,
       keepalive: 1000,
     })
-      .on("connect", () => {
+      .on("connect", async () => {
         console.log("connected to event listener");
+        await this.refreshToken();
+        await this.getHomeyToken();
       })
       .on("disconnect", () => {
         console.log("disconnected from event listener");
@@ -43,8 +45,6 @@ class StoreApp extends OAuth2App {
       });
 
     await super.onInit();
-    await this.refreshToken();
-    await this.getHomeyToken();
     Cron("*/4 * * * *", async () => {
       await this.refreshToken();
       await this.getHomeyToken();
