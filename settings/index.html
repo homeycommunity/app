@@ -47,7 +47,7 @@
         Homey.on('url', url => Homey.openURL(url));
         Homey.on('authorized', () => showLogout());
         Homey.on('error', err => {
-            if (err) return Homey.alert(err.message || err);
+            if (err) return Homey.alert(err.message || JSON.stringify(err));
         });
         Homey.api('GET', '/login/', {}, function (err, loggedIn) {
             if (loggedIn) {

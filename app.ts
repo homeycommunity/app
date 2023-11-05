@@ -30,7 +30,7 @@ class StoreApp extends OAuth2App {
       host: "wss://events.homeycommunity.space",
       port: 443,
       secure: true,
-      keepalive: 1000,
+      keepalive: 100,
     })
       .on("connect", async () => {
         console.log("connected to event listener");
