@@ -32,6 +32,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ./homeycommunityspace.tar.gz
+          prerelease: false
+          draft: false
 
     permissions:
       contents: write
