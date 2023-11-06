@@ -1,20 +1,18 @@
 import { AthomCloudAPI, HomeyAPI } from "athom-api";
 import Cron from "croner";
 import { connect, Emitter, EmitterMessage } from "emitter-io";
-import FormData from "form-data";
 import got from "got-cjs";
 import Homey from "homey";
 import { OAuth2App, OAuth2Token, OAuth2Util } from "homey-oauth2app";
-import fetch from "node-fetch";
 import { generators, Issuer } from "openid-client";
 import querystring from "querystring";
-import { Readable } from "stream";
-import { tarGzGlob } from "targz-glob";
 import { AthomStorageAdapterSettings } from "./AthomStorageAdapterSettings";
-import { HCSOAuthClient } from "./lib/HCSOAuthClient";
+import { HCSOAuthClient } from "./lib/HCS-OAuthClient";
+import { hcsServer } from "./lib/constants";
+import { downloadApp } from "./lib/download-app";
+import { installApp } from "./lib/install-app";
 
 class StoreApp extends OAuth2App {
-  private hcsServer = "https://homeycommunity.space";
   private _api?: AthomCloudAPI;
   private _cloudUser?: AthomCloudAPI.User;
   private _cloudHomey?: AthomCloudAPI.Homey;
@@ -25,6 +23,7 @@ class StoreApp extends OAuth2App {
   private token?: string;
   private eventKey?: string;
   private emitter?: Emitter;
+  private eventAdded = false;
   async onInit() {
     this.emitter = connect({
       host: "wss://events.homeycommunity.space",
@@ -34,8 +33,13 @@ class StoreApp extends OAuth2App {
     })
       .on("connect", async () => {
         console.log("connected to event listener");
-        await this.refreshToken();
-        await this.getHomeyToken();
+        try {
+          this.addEvent();
+          this.eventAdded = true;
+        } catch (err) {
+          this.eventAdded = false;
+          console.log(err);
+        }
       })
       .on("disconnect", () => {
         console.log("disconnected from event listener");
@@ -46,6 +50,21 @@ class StoreApp extends OAuth2App {
       });
 
     await super.onInit();
+    try {
+      await this.refreshToken();
+      await this.getHomeyToken();
+      if (!this.eventAdded) {
+        try {
+          this.addEvent();
+          this.eventAdded = true;
+        } catch (err) {
+          this.eventAdded = false;
+          console.log(err);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
     Cron("*/4 * * * *", async () => {
       await this.refreshToken();
       await this.getHomeyToken();
@@ -155,6 +174,15 @@ class StoreApp extends OAuth2App {
             client.setToken({ token: token! });
             client.save();
             await this.getHomeyToken();
+            if (!this.eventAdded) {
+              try {
+                this.addEvent();
+                this.eventAdded = true;
+              } catch (err) {
+                this.eventAdded = false;
+                console.log(err);
+              }
+            }
           } catch (err: any) {
             this.error("Could not create new OAuth2 client", err);
             this.homey.api.realtime(
@@ -196,8 +224,7 @@ class StoreApp extends OAuth2App {
     this.homeyId = await this.homey.cloud.getHomeyId();
     const res: any = await got
       .get(
-        `${this.hcsServer}/api/hcs/homey-token/` +
-          this.homeyId,
+        `${hcsServer}/api/hcs/homey-token/${this.homeyId}`,
         {
           headers: {
             Authorization: "Bearer " + token,
@@ -207,6 +234,14 @@ class StoreApp extends OAuth2App {
       .json();
     this.token = res.token;
 
+    if (!this.eventKey && res.eventKey) {
+      this.eventKey = res.eventKey;
+    }
+  }
+
+  async setupHomeyTokens(
+    executeWithToken: (token: string) => void | Promise<void>,
+  ) {
     this._api = new AthomCloudAPI({
       clientId: "64691b4358336640a5ecee5c",
       clientSecret: "ed09f559ae12b1522d00431f0bf7c5755603c41e",
@@ -217,28 +252,28 @@ class StoreApp extends OAuth2App {
     this._homeyApi = await HomeyAPI.forCurrentHomey(this.homey);
 
     this._api.setToken({
-      access_token: res.token,
-      refresh_token: res.token,
+      access_token: this.token!,
+      refresh_token: this.token!,
       expires_in: 3600,
       token_type: "Bearer",
     });
 
     this._cloudUser = await this._api.getAuthenticatedUser();
-    this._cloudHomey = await this._cloudUser.getHomeyById(this.homeyId);
+    this._cloudHomey = await this._cloudUser.getHomeyById(this.homeyId!);
     this._cloudHomeyApi = await this._cloudHomey.authenticate();
 
-    // await HomeyAPI.forCurrentHomey(this.homey, res.token);
-    if (await this._homeyApi.hasScope("homey:manager:devkit")) {
-      console.log("has devkit scope");
-    } else {
-      console.log("no devkit scope");
-    }
-    if (!this.eventKey && res.eventKey) {
-      this.eventKey = res.eventKey;
-      console.log("subscribed to", {
-        key: this.eventKey!,
-        channel: "homey/" + this.homeyId,
-      });
+    const cloudApi = this.homey.settings.get("cloudApi");
+    const bearerToken = cloudApi[`homeySession.${this.homeyId}`];
+
+    await executeWithToken(bearerToken);
+
+    await this._cloudHomeyApi.destroy();
+    await this._homeyApi.destroy();
+  }
+
+  addEvent() {
+    if (this.eventKey) {
+      console.log("adding event", this.eventKey);
       this.emitter
         ?.subscribe({
           key: this.eventKey!,
@@ -248,8 +283,10 @@ class StoreApp extends OAuth2App {
         .on("message", (msg: EmitterMessage) => {
           const output = JSON.parse(msg.asString());
           console.log(output);
-          this.downloadApp(output.app, output.version);
+          this.installApp(output.app, output.version);
         });
+    } else {
+      throw new Error("No event key found");
     }
   }
   async refreshToken() {
@@ -268,7 +305,6 @@ class StoreApp extends OAuth2App {
     const sessionId = Object.keys(session)[0];
     client.destroy();
 
-    console.log("refresh token");
     await got
       .post("https://auth.homeycommunity.space/application/o/token/", {
         method: "POST",
@@ -300,63 +336,31 @@ class StoreApp extends OAuth2App {
       })
       .catch((e) => console.log(e));
   }
-  async downloadApp(id: string, version: string) {
+
+  async installApp(id: string, version: string) {
     const token = await this._authToken();
-    console.log("downloadApp", id, version);
-    const fileUrl = `${this.hcsServer}/api/hcs/apps/${id}/download/${version}`;
-    const download = await got
-      .get(fileUrl, {
-        headers: {
-          Authorization: "Bearer " + token!,
-        },
-      })
-      .buffer();
+    await this.setupHomeyTokens(async (bearerToken) => {
+      const ip = await this.homey.cloud.getLocalAddress();
 
-    return this.installApp(id, version, download);
-  }
+      const stream = await downloadApp(id, version, token!);
+      console.log(id, version, stream, bearerToken, ip!);
+      const postResponse = await installApp(
+        id,
+        version,
+        stream,
+        bearerToken,
+        ip!,
+      );
 
-  async getEnv(buffer: Buffer) {
-    const env = await tarGzGlob(bufferToStream(buffer), "env.json");
-    return env.get("env.json")!;
-  }
-  async installApp(id: string, version: string, stream: Buffer) {
-    const env = await this.getEnv(stream)!;
-
-    const cloudApi = this.homey.settings.get("cloudApi");
-    const bearerToken = cloudApi[`homeySession.${this.homeyId}`];
-    const ip = await this.homey.cloud.getLocalAddress();
-
-    const form = new FormData();
-    form.append("app", stream, {
-      filename: id + "-" + version + ".tar.gz",
-      contentType: "octet/stream",
+      console.log(postResponse);
+      await this._cloudHomeyApi?.apps.updateApp({
+        id,
+        app: {
+          "origin": "devkit_install",
+        } as any,
+      });
+      console.log(postResponse);
     });
-    form.append("debug", "false");
-    if (env) {
-      form.append("env", env);
-    } else {
-      form.append("env", "{}");
-    }
-    form.append("purgeSettings", "false");
-
-    const postResponse = await fetch(`http://${ip}/api/manager/devkit`, {
-      method: "POST",
-      body: form,
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    })
-      .then((
-        res: any,
-      ) => res.json()).catch((e: any) => console.log(e));
-
-    await this._cloudHomeyApi?.apps.updateApp({
-      id,
-      app: {
-        "origin": "devkit_install",
-      } as any,
-    });
-    console.log(postResponse);
   }
 
   async logout() {
@@ -391,10 +395,3 @@ class StoreApp extends OAuth2App {
 }
 
 module.exports = StoreApp;
-
-// buffer to stream
-function bufferToStream(buffer: ArrayBuffer) {
-  const stream = Readable.from(Buffer.from(buffer));
-
-  return stream;
-}

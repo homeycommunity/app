@@ -18,17 +18,7 @@ class SpaceDriver extends OAuth2Driver {
    * @returns {Promise}
    */
   async onPairListDevices() {
-    return [
-      {
-        name: "Space",
-        data: {
-          id: "space",
-        },
-        store: {
-          apiVersion: 3,
-        },
-      },
-    ];
+    return [];
   }
 
   /**

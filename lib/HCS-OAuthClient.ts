@@ -1,7 +1,6 @@
-import axios from "axios";
+import got from "got-cjs";
 import { OAuth2Client, OAuth2Token } from "homey-oauth2app";
 import querystring from "querystring";
-import { http2Transport } from "./H2Adapter";
 
 export class HCSOAuthClient extends OAuth2Client {
   static API_URL = "https://homeycommunity.space/api/hcs";
@@ -16,17 +15,17 @@ export class HCSOAuthClient extends OAuth2Client {
     };
     try {
       // Exchange code for token
-      const res = await axios.post(
+      const res = await got.post(
         this._tokenUrl,
-        querystring.stringify(params),
         {
-          transport: http2Transport,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-        } as any
-      );
-      const body = res.data;
+          body: querystring.stringify(params),
+        },
+      ).json();
+
+      const body = res as any;
       return new OAuth2Token(body);
     } catch (err: any) {
       console.log("err", err);

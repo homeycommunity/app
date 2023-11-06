@@ -19,19 +19,15 @@
   "dependencies": {
     "@types/superagent": "^4.1.18",
     "athom-api": "^3.9.0",
-    "axios": "^1.4.0",
     "croner": "^6.0.6",
     "emitter-io": "^1.39.0",
-    "fetch-h2": "^3.0.2",
-    "fetch-http2": "^1.2.1",
     "form-data": "^4.0.0",
     "got-cjs": "^12.5.4",
     "homey-oauth2app": "^3.5.3",
-    "http2-wrapper": "^2.2.0",
     "node-fetch": "^2.7.0",
     "openid-client": "^5.4.3",
     "querystring": "^0.2.1",
     "superagent": "^8.1.2",
-    "targz-glob": "^0.0.3"
+    "targz-glob": "^0.0.5"
   }
 }
