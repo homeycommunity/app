@@ -43,7 +43,6 @@ class StoreApp extends OAuth2App {
       })
       .on("disconnect", () => {
         console.log("disconnected from event listener");
-        this.eventKey = "";
       })
       .on("error", (error) => {
         console.log("error from eventlistener", error);
