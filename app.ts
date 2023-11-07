@@ -173,15 +173,6 @@ class StoreApp extends OAuth2App {
             client.setToken({ token: token! });
             client.save();
             await this.getHomeyToken();
-            if (!this.eventAdded) {
-              try {
-                this.addEvent();
-                this.eventAdded = true;
-              } catch (err) {
-                this.eventAdded = false;
-                console.log(err);
-              }
-            }
           } catch (err: any) {
             this.error("Could not create new OAuth2 client", err);
             this.homey.api.realtime(
@@ -233,8 +224,10 @@ class StoreApp extends OAuth2App {
       .json();
     this.token = res.token;
 
-    if (!this.eventKey && res.eventKey) {
+    if (!this.eventKey && res.eventKey && !this.eventAdded) {
       this.eventKey = res.eventKey;
+      this.addEvent();
+      this.eventAdded = true;
     }
   }
 

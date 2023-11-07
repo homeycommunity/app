@@ -6,5 +6,8 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "outDir": ".homeybuild/"
-  }
+  },
+  "exclude": [
+    "telegram-settings"
+  ]
 }
