@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install
-        run: npm ci
+        run: npm ci && cd hcs_settings && npm ci && cd ..
 
       - name: Build
         run: npm run compile
