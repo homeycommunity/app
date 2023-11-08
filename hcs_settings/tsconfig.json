@@ -15,10 +15,6 @@
                 "./src/*"
             ]
         },
-        "typeRoots": [
-            "./node_modules/@types/",
-            "./node_modules"
-        ],
         "isolatedModules": true,
         "allowJs": true,
         "declaration": true,
