@@ -1,9 +1,9 @@
 import Homey from "@/Homey";
-import { createContext, useContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 
 type HomeyProviderProps = {
-    children: React.ReactNode
-    loading?: () => React.ReactNode
+    children: ReactNode
+    loading?: () => ReactNode
 }
 
 type HomeyProviderState = {
