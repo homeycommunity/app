@@ -17,11 +17,13 @@ export interface HomeyAPI {
 
   unset(key: string, callback?: (value: any) => void): Promise<any>;
 
+  on(eventName: string, listener: HomeyEventListener): void;
+
   api(
     key: string,
     path: string,
     body: any,
-    callback?: () => void,
+    callback?: (err: any, success: any) => void,
   ): Promise<any>;
 }
 
@@ -50,7 +52,7 @@ export default class Homey {
     key: string,
     path: string,
     body: any,
-    callback?: () => void,
+    callback?: (err: any, success: any) => void,
   ) {
     if (window.HomeyReady) return window.Homey.api(key, path, body, callback);
   }
@@ -65,6 +67,10 @@ export default class Homey {
 
   public static popup(url: string) {
     if (window.HomeyReady) return window.Homey.popup(url);
+  }
+
+  public static on(eventName: string, listener: HomeyEventListener) {
+    if (window.HomeyReady) return window.Homey.on(eventName, listener);
   }
 
   public static trigger(eventName: string, callback?: (err: any) => void) {

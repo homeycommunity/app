@@ -8,6 +8,6 @@
     "outDir": ".homeybuild/"
   },
   "exclude": [
-    "telegram-settings"
+    "hcs_settings"
   ]
 }

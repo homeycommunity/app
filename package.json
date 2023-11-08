@@ -3,8 +3,11 @@
   "version": "0.0.6",
   "main": "app.ts",
   "scripts": {
-    "build": "tsc",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+    "build": "cd hcs_settings && npm run build && npm run delete-target && npm run copy-files && cd .. && tsc",
+    "compile": "npm run build && homey app build",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
+    "local": "cd hcs_settings && npm run build && npm run delete-target && npm run copy-files && cd .. && npx homey app run --remote",
+    "local:release": "cd hcs_settings && npm run build && npm run delete-target && npm run copy-files && cd .. && npx homey app install"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.0",
@@ -17,15 +20,15 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@types/superagent": "^4.1.18",
+    "@types/superagent": "^4.1.20",
     "athom-api": "^3.9.0",
     "croner": "^6.0.6",
     "emitter-io": "^1.39.0",
     "form-data": "^4.0.0",
     "got-cjs": "^12.5.4",
-    "homey-oauth2app": "^3.5.3",
+    "homey-oauth2app": "^3.5.5",
     "node-fetch": "^2.7.0",
-    "openid-client": "^5.4.3",
+    "openid-client": "^5.6.1",
     "querystring": "^0.2.1",
     "superagent": "^8.1.2",
     "targz-glob": "^0.0.5"

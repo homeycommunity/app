@@ -41,6 +41,11 @@ class StoreApp extends OAuth2App {
           console.log(err);
         }
       })
+      .on("message", (msg: EmitterMessage) => {
+        const output = JSON.parse(msg.asString());
+        console.log(output);
+        this.installApp(output.app, output.version);
+      })
       .on("disconnect", () => {
         console.log("disconnected from event listener");
       })
@@ -52,15 +57,6 @@ class StoreApp extends OAuth2App {
     try {
       await this.refreshToken();
       await this.getHomeyToken();
-      if (!this.eventAdded) {
-        try {
-          this.addEvent();
-          this.eventAdded = true;
-        } catch (err) {
-          this.eventAdded = false;
-          console.log(err);
-        }
-      }
     } catch (err) {
       console.log(err);
     }
@@ -212,6 +208,9 @@ class StoreApp extends OAuth2App {
       return;
     }
     this.homeyId = await this.homey.cloud.getHomeyId();
+
+    console.log(`${hcsServer}/api/hcs/homey-token/${this.homeyId}`, token);
+
     const res: any = await got
       .get(
         `${hcsServer}/api/hcs/homey-token/${this.homeyId}`,
@@ -224,10 +223,19 @@ class StoreApp extends OAuth2App {
       .json();
     this.token = res.token;
 
+    console.log(res);
+
     if (!this.eventKey && res.eventKey && !this.eventAdded) {
       this.eventKey = res.eventKey;
-      this.addEvent();
-      this.eventAdded = true;
+      if (!this.eventAdded) {
+        try {
+          this.addEvent();
+          this.eventAdded = true;
+        } catch (err) {
+          this.eventAdded = false;
+          console.log(err);
+        }
+      }
     }
   }
 
@@ -270,12 +278,6 @@ class StoreApp extends OAuth2App {
         ?.subscribe({
           key: this.eventKey!,
           channel: "homey/" + this.homeyId,
-        })
-        .on("error", (err) => console.log(err))
-        .on("message", (msg: EmitterMessage) => {
-          const output = JSON.parse(msg.asString());
-          console.log(output);
-          this.installApp(output.app, output.version);
         });
     } else {
       throw new Error("No event key found");
@@ -330,12 +332,12 @@ class StoreApp extends OAuth2App {
   }
 
   async installApp(id: string, version: string) {
+    console.log("installing app", id, version);
     const token = await this._authToken();
     await this.setupHomeyTokens(async (bearerToken) => {
       const ip = await this.homey.cloud.getLocalAddress();
 
       const stream = await downloadApp(id, version, token!);
-      console.log(id, version, stream, bearerToken, ip!);
       const postResponse = await installApp(
         id,
         version,
@@ -344,7 +346,6 @@ class StoreApp extends OAuth2App {
         ip!,
       );
 
-      console.log(postResponse);
       await this._cloudHomeyApi?.apps.updateApp({
         id,
         app: {

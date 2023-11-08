@@ -1,6 +1,6 @@
 {
   "id": "space.homeycommunity.app",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -35,6 +35,10 @@
     "postLogin": {
       "method": "post",
       "path": "/login/"
+    },
+    "installApp": {
+      "method": "post",
+      "path": "/apps/install/"
     }
   }
 }

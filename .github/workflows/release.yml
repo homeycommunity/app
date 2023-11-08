@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npx homey app build
+        run: npm run compile
 
       - name: Make tarball
         run: tar -czf homeycommunityspace.tar.gz -C .homeybuild .

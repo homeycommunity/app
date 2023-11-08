@@ -9,13 +9,21 @@
             window.Homey = Homey;
             Homey.ready();
             window.HomeyReady = true;
+            Homey.on('url', url => Homey.openURL(url));
+            Homey.on('error', err => {
+                if (err) return Homey.alert(err.message || JSON.stringify(err));
+            });
+
+            document.querySelector('link[href*="homey.css"]')?.remove();
         }
+
     </script>
 </head>
 
-<body style="padding: 0 !important; min-height: auto !important;">
+<body style="padding: 0 !important; min-height: 100% !important;">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
 </body>
 
 </html>
