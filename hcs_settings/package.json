@@ -19,8 +19,8 @@
         "start": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "delete-target": "rm -Rf ../settings && mkdir ../settings",
-        "copy-files": "cp -R build/ ../settings"
+        "delete-target": "rimraf ../settings",
+        "copy-files": "copy-folder build ../settings"
     },
     "browserslist": {
         "production": [
@@ -40,7 +40,9 @@
         "@types/react-dom": "^18.2.14",
         "@vitejs/plugin-react": "^4.1.1",
         "autoprefixer": "^10.4.16",
+        "copy-folder-util": "^1.1.2",
         "postcss": "^8.4.31",
+        "rimraf": "^5.0.5",
         "tailwindcss": "^3.3.5",
         "typescript": "^5.2.2",
         "vite": "^4.5.0",
