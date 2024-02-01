@@ -1,1 +1,1 @@
-export const hcsServer = "https://homeycommunity.space" as const;
+export const hcsServer = 'https://homeycommunity.space' as const;

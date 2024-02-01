@@ -1,4 +1,5 @@
-import { wait } from "./wait";
+/* eslint-disable @typescript-eslint/ban-types */
+import { wait } from './wait';
 
 /**
  * Method that applies a retry strategy to the provided async function. By default the async
@@ -14,10 +15,10 @@ export async function wrapAsyncWithRetry(
   times = 1,
   interval: Function | number = 0,
 ) {
-  if (typeof method !== "function") throw TypeError("expected_function");
-  if (typeof times !== "number") throw TypeError("expected_times_number");
-  if (typeof interval !== "number" && typeof interval !== "function") {
-    throw TypeError("expected_interval_number_or_function");
+  if (typeof method !== 'function') throw TypeError('expected_function');
+  if (typeof times !== 'number') throw TypeError('expected_times_number');
+  if (typeof interval !== 'number' && typeof interval !== 'function') {
+    throw TypeError('expected_interval_number_or_function');
   }
   return new Promise((resolve, reject) => {
     let retries = 0;
@@ -32,9 +33,8 @@ export async function wrapAsyncWithRetry(
             retries += 1;
 
             // Determine time to wait
-            const waitTime = typeof interval === "function"
-              ? interval(retries)
-              : interval;
+            const waitTime =
+              typeof interval === 'function' ? interval(retries) : interval;
             return wait(waitTime).then(executeMethod);
           }
           return reject(err);

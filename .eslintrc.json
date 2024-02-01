@@ -1,3 +1,76 @@
 {
-  "extends": "athom"
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "strict": ["error", "global"],
+
+    "no-await-in-loop": "off",
+
+    "lines-between-class-members": [
+      "error",
+      "always",
+      { "exceptAfterSingleLine": true }
+    ],
+
+    "prefer-destructuring": [
+      "error",
+      {
+        "VariableDeclarator": { "array": false, "object": true },
+        "AssignmentExpression": { "array": false, "object": false }
+      },
+      { "enforceForRenamedProperties": false }
+    ],
+
+    "arrow-body-style": "off",
+
+    "no-underscore-dangle": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "no-bitwise": "off",
+
+    "no-param-reassign": "off",
+
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+
+    "no-plusplus": "off",
+
+    "class-methods-use-this": "off",
+
+    "no-continue": "off",
+
+    "dot-notation": "off",
+
+    "no-unused-vars": [
+      "error",
+      { "vars": "all", "args": "none", "ignoreRestSiblings": true }
+    ],
+
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ],
+
+    "no-shadow": "off"
+  },
+
+  "settings": {
+    "import/core-modules": ["homey"]
+  }
 }

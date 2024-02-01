@@ -31,21 +31,21 @@ export default function App () {
     return <Tabs defaultValue="account" className="w-full">
         <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="store">Store</TabsTrigger>
+            {isLoggedIn && <TabsTrigger value="store">Store</TabsTrigger>}
         </TabsList>
         <TabsContent value="account">
-            {isLoggedIn ? "You are logged in." : "You are not logged in."}
-            {isLoggedIn ? <button onClick={() => {
+            {isLoggedIn ? <div>You are logged in</div> : <div>You are not logged in.</div>}
+            {isLoggedIn ? <Button onClick={() => {
                 homey.api('POST', '/login/', { state: false }, function (err, success) {
                     if (!err && success) setIsLoggedIn(false);
                 });
-            }}>Logout</button> : <button onClick={() => {
+            }}>Logout</Button> : <Button onClick={() => {
                 homey.api('POST', '/login/', { state: true }, function (err, success) {
                     if (!err && success) setIsLoggedIn(true)
                 });
-            }}>Login</button>}
+            }}>Login</Button>}
         </TabsContent>
-        <TabsContent value="store">
+        {isLoggedIn && <TabsContent value="store">
             {apps.map(app => <Card key={app.identifier} className="mb-4">
                 <CardTitle>{app.name}</CardTitle>
                 <CardDescription>{app.versions[0].version}</CardDescription>
@@ -59,6 +59,6 @@ export default function App () {
                     }} variant="default">Install</Button>
                 </CardFooter>
             </Card>)}
-        </TabsContent>
+        </TabsContent>}
     </Tabs>
 }

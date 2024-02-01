@@ -1,6 +1,6 @@
-declare module "homey-oauth2app" {
-  import { EventEmitter } from "events";
-  import Homey from "homey";
+declare module 'homey-oauth2app' {
+  import { EventEmitter } from 'events';
+  import Homey from 'homey';
   /**
    * @extends Homey.App
    * @type {module.OAuth2App}
@@ -77,6 +77,7 @@ declare module "homey-oauth2app" {
       scopes?: string[];
       allowMultiSession?: boolean;
     }): void;
+
     hasConfig({ configId }?: { configId?: string }): boolean;
     /**
      * @param {object} args
@@ -96,6 +97,7 @@ declare module "homey-oauth2app" {
       sessionId: any;
       configId?: string;
     }): boolean;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -108,6 +110,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId?: string;
     }): void;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -121,6 +124,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId?: string;
     }): any;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -133,6 +137,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId: string;
     }): void;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -146,6 +151,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId?: string;
     }): OAuth2Client;
+
     /**
      * @param {object} args
      * @param {string} args.configId
@@ -161,6 +167,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       client: OAuth2Client;
     }): void;
+
     /**
      * @returns {object}
      */
@@ -181,6 +188,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId: string;
     }): void;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -194,6 +202,7 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId: string;
     }): Promise<boolean>;
+
     /**
      * @param {object} args
      * @param {string} args.sessionId
@@ -207,9 +216,10 @@ declare module "homey-oauth2app" {
       sessionId: string;
       configId: string;
     }): Promise<any[]>;
+
     [sDebug]: boolean;
-    [sConfigs]: {};
-    [sClients]: {};
+    [sConfigs]: any;
+    [sClients]: any;
   }
   declare const sDebug: unique symbol;
   declare const sConfigs: unique symbol;
@@ -261,6 +271,7 @@ declare module "homey-oauth2app" {
       redirectUrl: string;
       scopes: any[];
     });
+
     public homey: Homey;
     protected _tokenConstructor: string;
     protected _clientId: string;
@@ -315,6 +326,7 @@ declare module "homey-oauth2app" {
       query: string;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @param {string} args.path
@@ -331,6 +343,7 @@ declare module "homey-oauth2app" {
       query: string;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @param {string} args.path
@@ -353,6 +366,7 @@ declare module "homey-oauth2app" {
       body: object;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @param {string} args.path
@@ -375,6 +389,7 @@ declare module "homey-oauth2app" {
       body: object;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @param {string} args.path
@@ -397,6 +412,7 @@ declare module "homey-oauth2app" {
       body: object;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @returns {Promise<undefined|void|null>}
@@ -430,6 +446,7 @@ declare module "homey-oauth2app" {
       username: string;
       password: string;
     }): Promise<null>;
+
     /**
      * @returns {string|null}
      */
@@ -452,6 +469,7 @@ declare module "homey-oauth2app" {
       scopes: any[];
       state: string;
     }): string;
+
     /**
      * @returns {string}
      */
@@ -500,6 +518,7 @@ declare module "homey-oauth2app" {
       opts: object;
       url: string;
     }>;
+
     /**
      * @description Can be extended
      * @param {object} args
@@ -532,6 +551,7 @@ declare module "homey-oauth2app" {
     }: {
       response: object;
     }): Promise<void>;
+
     /**
      * @description Can be extended
      * @param {object} args
@@ -543,6 +563,7 @@ declare module "homey-oauth2app" {
     }: {
       response: object;
     }): Promise<void>;
+
     /**
      * @description {@link https://tools.ietf.org/html/rfc6749#section-4.3.2}
      * @param {object} args
@@ -557,16 +578,19 @@ declare module "homey-oauth2app" {
       username: string;
       password: string;
     }): Promise<OAuth2Token>;
+
     onHandleGetTokenByCredentialsError({
       response,
     }: {
       response: any;
     }): Promise<void>;
+
     onHandleGetTokenByCredentialsResponse({
       response,
     }: {
       response: any;
     }): Promise<any>;
+
     /**
      * @description {@link https://tools.ietf.org/html/rfc6749#section-6}
      * @returns {Promise<OAuth2Token>}
@@ -582,6 +606,7 @@ declare module "homey-oauth2app" {
     }: {
       response: object;
     }): Promise<void>;
+
     /**
      * @param {object} args
      * @param {object} args.response
@@ -592,6 +617,7 @@ declare module "homey-oauth2app" {
     }: {
       response: object;
     }): Promise<OAuth2Token>;
+
     /**
      * @param {object} args
      * @param args.response
@@ -634,6 +660,7 @@ declare module "homey-oauth2app" {
       response: any;
       didRefreshToken: any;
     }): Promise<void | any>;
+
     /**
      * @description This method returns a boolean if the token should be refreshed
      * @param {object} args
@@ -655,6 +682,7 @@ declare module "homey-oauth2app" {
       status: number;
       headers: object;
     }): Promise<boolean>;
+
     /**
      * @description This method handles a response and downloads the body
      * @param {object} args
@@ -678,6 +706,7 @@ declare module "homey-oauth2app" {
       headers: object;
       ok: boolean;
     }): Promise<any | undefined>;
+
     /**
      * @description This method handles a response that is not OK (400 <= statuscode <= 599)
      * @param {object} args
@@ -698,6 +727,7 @@ declare module "homey-oauth2app" {
       statusText: string;
       headers: object;
     }): Promise<Error>;
+
     /**
      * @description This method handles a response that is OK
      * @param {object} args
@@ -718,6 +748,7 @@ declare module "homey-oauth2app" {
       statusText: string;
       headers: object;
     }): Promise<any>;
+
     /**
      * @param {object} args
      * @param {array.<string>} args.scopes
@@ -731,6 +762,7 @@ declare module "homey-oauth2app" {
       scopes: array<string>;
       state: string;
     }): string;
+
     /**
      * @description {@link https://tools.ietf.org/html/rfc6749#appendix-A.4}
      * @param {object} args
@@ -866,6 +898,7 @@ declare module "homey-oauth2app" {
       token_type?: any;
       expires_in?: any;
     });
+
     access_token: any;
     refresh_token: any;
     token_type: any;

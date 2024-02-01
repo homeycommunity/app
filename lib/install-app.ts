@@ -1,37 +1,40 @@
-import FormData from "form-data";
-import fetch from "node-fetch";
-import { getEnv } from "./utils/get-env";
+import { getEnv } from './utils/get-env';
 export async function installApp(
   id: string,
   version: string,
-  stream: Buffer,
+  stream: ArrayBuffer,
   bearerToken: string,
   ip: string,
 ) {
-  const env = await getEnv(stream)!;
+  const env = await getEnv(stream);
   const form = new FormData();
-  form.append("app", stream, {
-    filename: id + "-" + version + ".tar.gz",
-    contentType: "octet/stream",
-  });
-  form.append("debug", "false");
+  form.append(
+    'app',
+    new Blob([Buffer.from(stream)]),
+    id + '-' + version + '.tar.gz',
+  );
+  form.append('debug', 'false');
   if (env) {
-    form.append("env", env);
+    form.append('env', env);
   } else {
-    form.append("env", "{}");
+    form.append('env', '{}');
   }
-  form.append("purgeSettings", "false");
-
+  form.append('purgeSettings', 'false');
   const postResponse = await fetch(`http://${ip}/api/manager/devkit`, {
-    method: "POST",
+    method: 'POST',
     body: form,
     headers: {
       Authorization: `Bearer ${bearerToken}`,
     },
   })
-    .then((
-      res: any,
-    ) => res.json()).catch((e: any) => console.log(e));
+    .then((e) => {
+      return e.json();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  console.log(postResponse);
 
   return postResponse;
 }

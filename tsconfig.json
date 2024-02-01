@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
     "module": "CommonJS",
@@ -7,7 +7,5 @@
     "allowSyntheticDefaultImports": true,
     "outDir": ".homeybuild/"
   },
-  "exclude": [
-    "hcs_settings"
-  ]
+  "exclude": ["hcs_settings"]
 }
