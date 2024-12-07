@@ -64,10 +64,9 @@ class StoreApp extends OAuth2App {
   async onOAuth2Init() {
     this.setOAuth2Config({
       client: HCSOAuthClient,
-      tokenUrl: 'https://auth.homeycommunity.space/application/o/token/',
+      tokenUrl: 'https://accounts.homeycommunity.space/oidc/token/',
       redirectUrl: 'https://callback.athom.com/oauth2/callback',
-      authorizationUrl:
-        'https://auth.homeycommunity.space/application/o/authorize/',
+      authorizationUrl: 'https://accounts.homeycommunity.space/oidc/auth',
       apiUrl: 'https://homeycommunity.space/api/',
       clientId: Homey.env.CLIENT_ID,
       clientSecret: Homey.env.CLIENT_SECRET,
@@ -108,8 +107,9 @@ class StoreApp extends OAuth2App {
 
       // Start OAuth2 process
       const apiUrl = client.getAuthorizationUrl();
-      const oauth2Callback =
-        await this.homey.cloud.createOAuth2Callback(apiUrl);
+      const oauth2Callback = await this.homey.cloud.createOAuth2Callback(
+        apiUrl
+      );
       oauth2Callback
         .on('url', (url: string) => this.homey.api.realtime('url', url))
         .on('code', async (code: string) => {
@@ -124,8 +124,8 @@ class StoreApp extends OAuth2App {
               new Error(
                 this.homey.__('authentication.re-login_failed_with_error', {
                   error: err.message || err.toString(),
-                }),
-              ),
+                })
+              )
             );
           }
           // get the client's session info
@@ -150,8 +150,8 @@ class StoreApp extends OAuth2App {
               new Error(
                 this.homey.__('authentication.re-login_failed_with_error', {
                   error: err.message || err.toString(),
-                }),
-              ),
+                })
+              )
             );
           }
 
@@ -190,7 +190,7 @@ class StoreApp extends OAuth2App {
   }
 
   async setupHomeyTokens(
-    executeWithToken: (token: string) => void | Promise<void>,
+    executeWithToken: (token: string) => void | Promise<void>
   ) {
     this._api = new AthomCloudAPI({
       clientId: '64691b4358336640a5ecee5c',
@@ -253,7 +253,7 @@ class StoreApp extends OAuth2App {
         version,
         stream,
         bearerToken,
-        ip,
+        ip
       );
 
       await this._cloudHomeyApi?.apps.updateApp({
@@ -291,7 +291,7 @@ class StoreApp extends OAuth2App {
       '_getSession() ->',
       Object.keys(sessions).length === 1
         ? Object.keys(sessions)[0]
-        : 'no session found',
+        : 'no session found'
     );
     return Object.keys(sessions).length === 1 ? sessions : null;
   }

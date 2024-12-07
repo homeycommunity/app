@@ -1,6 +1,6 @@
 {
   "name": "space.homeycommunity.app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "app.ts",
   "scripts": {
     "build": "cd hcs_settings && npm run build && npm run delete-target && npm run copy-files && cd .. && tsc",

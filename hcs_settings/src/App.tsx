@@ -1,64 +1,183 @@
+import { useHomey } from '@/components/homey-provider';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { useEffect, useState } from 'react';
 
-import { useHomey } from "@/components/homey-provider";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
+interface AppVersion {
+  version: string;
+}
 
-export default function App () {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const { homey } = useHomey();
-    const [apps, setApps] = useState<{ identifier: string, name: string, versions: { version: string }[] }[]>([]);
-    const { toast } = useToast();
-    useEffect(() => {
-        homey.on('authorized', () => {
-            setIsLoggedIn(true);
-        })
-        homey.api('GET', '/login/', {}, function (err, loggedIn) {
-            console.log('hest');
-            if (loggedIn) {
-                setIsLoggedIn(true)
-            } else {
-                setIsLoggedIn(false);
-            }
-        });
+interface App {
+  identifier: string;
+  name: string;
+  versions: AppVersion[];
+}
 
-        fetch('https://homeycommunity.space/api/hcs/apps').then(res => res.json()).then(data => {
-            setApps(data);
-        });
-    }, [])
-    return <Tabs defaultValue="account" className="w-full">
-        <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            {isLoggedIn && <TabsTrigger value="store">Store</TabsTrigger>}
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { homey } = useHomey();
+  const [apps, setApps] = useState<App[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    homey.on('authorized', () => {
+      setIsLoggedIn(true);
+    });
+
+    homey.api('GET', '/login/', {}, (err: Error | null, loggedIn: boolean) => {
+      if (loggedIn) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    });
+
+    fetch('https://homeycommunity.space/api/hcs/apps')
+      .then((res) => res.json())
+      .then((data: App[]) => {
+        setApps(data);
+      });
+  }, []);
+
+  return (
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Homey Community Store</h1>
+        <p className="text-muted-foreground">
+          Manage your HCS account and discover community apps
+        </p>
+      </div>
+
+      <Tabs defaultValue="account" className="w-full space-y-6">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="account" className="flex-1 max-w-[200px]">
+            Account
+          </TabsTrigger>
+          {isLoggedIn && (
+            <TabsTrigger value="store" className="flex-1 max-w-[200px]">
+              Store
+            </TabsTrigger>
+          )}
         </TabsList>
-        <TabsContent value="account">
-            {isLoggedIn ? <div>You are logged in</div> : <div>You are not logged in.</div>}
-            {isLoggedIn ? <Button onClick={() => {
-                homey.api('POST', '/login/', { state: false }, function (err, success) {
-                    if (!err && success) setIsLoggedIn(false);
-                });
-            }}>Logout</Button> : <Button onClick={() => {
-                homey.api('POST', '/login/', { state: true }, function (err, success) {
-                    if (!err && success) setIsLoggedIn(true)
-                });
-            }}>Login</Button>}
-        </TabsContent>
-        {isLoggedIn && <TabsContent value="store">
-            {apps.map(app => <Card key={app.identifier} className="mb-4">
-                <CardTitle>{app.name}</CardTitle>
-                <CardDescription>{app.versions[0].version}</CardDescription>
-                <CardFooter>
-                    <Button onClick={() => {
-                        toast({ title: 'Installing app', variant: 'default' });
-                        homey.api('POST', '/apps/install/', { id: app.identifier, version: app.versions[0].version }, function (err, success) {
 
-                            if (!err && success) toast({ title: 'Installed app', variant: 'default' });;
+        <TabsContent value="account">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Status</CardTitle>
+              <CardDescription>
+                Manage your Homey Community Store account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      isLoggedIn ? 'bg-green-500' : 'bg-red-500'
+                    }`}
+                  />
+                  <span className="text-lg">
+                    {isLoggedIn ? 'Connected to HCS' : 'Not connected to HCS'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              {isLoggedIn ? (
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    homey.api(
+                      'POST',
+                      '/login/',
+                      { state: false },
+                      (err: Error | null, success: boolean) => {
+                        if (!err && success) setIsLoggedIn(false);
+                      }
+                    );
+                  }}
+                >
+                  Disconnect Account
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    homey.api(
+                      'POST',
+                      '/login/',
+                      { state: true },
+                      (err: Error | null, success: boolean) => {
+                        if (!err && success) setIsLoggedIn(true);
+                      }
+                    );
+                  }}
+                >
+                  Connect Account
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        {isLoggedIn && (
+          <TabsContent value="store">
+            <div className="grid gap-6 md:grid-cols-2">
+              {apps.map((app) => (
+                <Card key={app.identifier} className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="text-xl">{app.name}</CardTitle>
+                    <CardDescription className="flex items-center space-x-2">
+                      <span className="px-2 py-1 bg-secondary rounded-md text-xs">
+                        v{app.versions[0].version}
+                      </span>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter className="mt-auto">
+                    <Button
+                      onClick={() => {
+                        toast({
+                          title: 'Installing app...',
+                          variant: 'default',
                         });
-                    }} variant="default">Install</Button>
-                </CardFooter>
-            </Card>)}
-        </TabsContent>}
-    </Tabs>
+                        homey.api(
+                          'POST',
+                          '/apps/install/',
+                          {
+                            id: app.identifier,
+                            version: app.versions[0].version,
+                          },
+                          (err: Error | null, success: boolean) => {
+                            if (!err && success)
+                              toast({
+                                title: 'Successfully installed app',
+                                description: `${app.name} has been installed`,
+                                variant: 'default',
+                              });
+                          }
+                        );
+                      }}
+                      variant="default"
+                      className="w-full"
+                    >
+                      Install App
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        )}
+      </Tabs>
+    </div>
+  );
 }

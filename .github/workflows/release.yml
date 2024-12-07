@@ -3,7 +3,7 @@ name: Build/release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
 
 jobs:
   release:
@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install
-        run: npm ci && cd hcs_settings && npm ci && cd ..
+        run: npm ci --force && cd hcs_settings && npm ci --force && cd ..
 
       - name: Build
         run: npm run compile

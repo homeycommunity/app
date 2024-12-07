@@ -1,10 +1,14 @@
 import { OAuth2Client } from './OAuth/OAuth2Client';
 
+const api =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3000/api/'
+    : 'https://homeycommunity.space/api/';
+
 export class HCSOAuthClient extends OAuth2Client {
-  static API_URL = 'https://homeycommunity.space/api/';
-  static TOKEN_URL = 'https://auth.homeycommunity.space/application/o/token/';
-  static AUTHORIZATION_URL =
-    'https://auth.homeycommunity.space/application/o/authorize/';
+  static API_URL = api;
+  static TOKEN_URL = 'https://accounts.homeycommunity.space/oidc/token/';
+  static AUTHORIZATION_URL = 'https://accounts.homeycommunity.space/oidc/auth/';
 
   static SCOPES = ['openid', 'email', 'profile'];
 

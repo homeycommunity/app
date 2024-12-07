@@ -7,5 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "outDir": ".homeybuild/"
   },
-  "exclude": ["hcs_settings"]
+  "exclude": [
+    "hcs_settings"
+  ]
 }
