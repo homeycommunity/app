@@ -4,14 +4,14 @@ export async function installApp(
   version: string,
   stream: ArrayBuffer,
   bearerToken: string,
-  ip: string,
+  ip: string
 ) {
   const env = await getEnv(stream);
   const form = new FormData();
   form.append(
     'app',
     new Blob([Buffer.from(stream)]),
-    id + '-' + version + '.tar.gz',
+    id + '-' + version + '.tar.gz'
   );
   form.append('debug', 'false');
   if (env) {
@@ -37,4 +37,27 @@ export async function installApp(
   console.log(postResponse);
 
   return postResponse;
+}
+
+export async function updateApp(
+  app: any,
+  id: string,
+  bearerToken: string,
+  ip: string
+) {
+  const res = await fetch(`http://${ip}/api/manager/apps/app/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(app),
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+  })
+    .then((e) => {
+      return e.json();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  return res;
 }

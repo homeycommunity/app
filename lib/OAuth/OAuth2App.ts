@@ -238,7 +238,13 @@ export class OAuth2App extends Homey.App {
    * @param {string} args.configId
    * @returns {*}
    */
-  createOAuth2Client({ sessionId, configId = 'default' } = {}) {
+  createOAuth2Client({
+    sessionId,
+    configId = 'default',
+  }: {
+    sessionId: string;
+    configId?: string;
+  }) {
     if (this.hasOAuth2Client({ configId, sessionId })) {
       throw new OAuth2Error('OAuth2 Client already exists');
     }
@@ -271,14 +277,14 @@ export class OAuth2App extends Homey.App {
     clientInstance.on('log', (...args) =>
       this.log(
         `[${clientInstance.constructor.name}] [c:${configId}] [s:${sessionId}]`,
-        ...args,
-      ),
+        ...args
+      )
     );
     clientInstance.on('error', (...args) =>
       this.error(
         `[${clientInstance.constructor.name}] [c:${configId}] [s:${sessionId}]`,
-        ...args,
-      ),
+        ...args
+      )
     );
     clientInstance.on(
       'debug',
@@ -286,14 +292,14 @@ export class OAuth2App extends Homey.App {
         this[sDebug] &&
         this.log(
           `[dbg] [${clientInstance.constructor.name}] [c:${configId}] [s:${sessionId}]`,
-          ...args,
-        ),
+          ...args
+        )
     );
     clientInstance.on('save', () =>
-      this.saveOAuth2Client({ client: clientInstance, configId, sessionId }),
+      this.saveOAuth2Client({ client: clientInstance, configId, sessionId })
     );
     clientInstance.on('destroy', () =>
-      this.deleteOAuth2Client({ configId, sessionId }),
+      this.deleteOAuth2Client({ configId, sessionId })
     );
     clientInstance.init();
     return clientInstance;
@@ -304,7 +310,13 @@ export class OAuth2App extends Homey.App {
    * @param {string} args.sessionId
    * @param {string} args.configId
    */
-  deleteOAuth2Client({ sessionId, configId = 'default' } = {}) {
+  deleteOAuth2Client({
+    sessionId,
+    configId = 'default',
+  }: {
+    sessionId: string;
+    configId?: string;
+  }) {
     // remove from storage
     const savedSessions = this.getSavedOAuth2Sessions();
     const savedSession = savedSessions[sessionId];
@@ -323,7 +335,13 @@ export class OAuth2App extends Homey.App {
    * @param {string} args.configId
    * @returns {OAuth2Client}
    */
-  getOAuth2Client({ sessionId, configId = 'default' } = {}) {
+  getOAuth2Client({
+    sessionId,
+    configId = 'default',
+  }: {
+    sessionId: string;
+    configId?: string;
+  }) {
     // if the client for this session has already been initialized, return that
     if (this.hasOAuth2Client({ configId, sessionId })) {
       return this[sClients][configId][sessionId];

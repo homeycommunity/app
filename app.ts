@@ -1,22 +1,17 @@
-import { AthomCloudAPI, HomeyAPI } from 'athom-api';
 import { Emitter, EmitterMessage, connect } from 'emitter-io';
 import Homey from 'homey';
-import { AthomStorageAdapterSettings } from './AthomStorageAdapterSettings';
 import { HCSOAuthClient } from './lib/HCS-OAuthClient';
 import { OAuth2App } from './lib/OAuth/OAuth2App';
 import { OAuth2Util } from './lib/OAuth/OAuth2Util';
-import { installApp } from './lib/install-app';
+import { installApp, updateApp } from './lib/install-app';
 
 class StoreApp extends OAuth2App {
   static OAUTH2_DEBUG = true;
-  private _api?: AthomCloudAPI;
   private oAuth2Client?: HCSOAuthClient;
-  private _cloudUser?: AthomCloudAPI.User;
-  private _cloudHomey?: AthomCloudAPI.Homey;
   private homeyId?: string;
-  private _cloudHomeyApi?: HomeyAPI;
-  private _homeyApi?: HomeyAPI;
   private token?: string;
+  private bearerToken?: string;
+  private expiresAt?: number;
   private eventKey?: string;
   private emitter?: Emitter;
   private eventAdded = false;
@@ -172,9 +167,8 @@ class StoreApp extends OAuth2App {
 
     const res = await this.oAuth2Client?.getHomeyToken(this.homeyId!);
     this.token = res.token;
-
-    console.log(res);
-    console.log(this.eventKey, res.eventKey, this.eventAdded);
+    this.bearerToken = res.sessionToken;
+    this.expiresAt = res.expiresAt;
     if (!this.eventKey && res.eventKey && !this.eventAdded) {
       this.eventKey = res.eventKey;
       if (!this.eventAdded) {
@@ -187,43 +181,6 @@ class StoreApp extends OAuth2App {
         }
       }
     }
-  }
-
-  async setupHomeyTokens(
-    executeWithToken: (token: string) => void | Promise<void>
-  ) {
-    this._api = new AthomCloudAPI({
-      clientId: '64691b4358336640a5ecee5c',
-      clientSecret: 'ed09f559ae12b1522d00431f0bf7c5755603c41e',
-      redirectUrl: 'https://callback.athom.com/oauth2/callback',
-      store: new AthomStorageAdapterSettings(this.homey),
-    });
-
-    this._homeyApi = await HomeyAPI.forCurrentHomey(this.homey);
-
-    if (!this.token || !this.homeyId) {
-      return;
-    }
-
-    this._api.setToken({
-      access_token: this.token,
-      refresh_token: this.token,
-      expires_in: 3600,
-      token_type: 'Bearer',
-    });
-
-    this._cloudUser = await this._api.getAuthenticatedUser();
-    this._cloudHomey = await this._cloudUser.getHomeyById(this.homeyId);
-    this._cloudHomeyApi = await this._cloudHomey.authenticate();
-
-    const cloudApi = this.homey.settings.get('cloudApi');
-    const bearerToken = cloudApi[`homeySession.${this.homeyId}`];
-
-    await executeWithToken(bearerToken);
-
-    await this._cloudHomeyApi.destroy();
-    await this._homeyApi.destroy();
-    delete this._api;
   }
 
   addEvent() {
@@ -240,30 +197,29 @@ class StoreApp extends OAuth2App {
 
   async installApp(id: string, version: string) {
     console.log('installing app', id, version);
-    await this.setupHomeyTokens(async (bearerToken) => {
-      console.log(bearerToken);
-      const ip = await this.homey.cloud.getLocalAddress();
 
-      if (!this.oAuth2Client) {
-        return;
-      }
-      const stream = await this.oAuth2Client.downloadApp(id, version);
-      const postResponse = await installApp(
-        id,
-        version,
-        stream,
-        bearerToken,
-        ip
-      );
+    const ip = await this.homey.cloud.getLocalAddress();
 
-      await this._cloudHomeyApi?.apps.updateApp({
-        id,
-        app: {
-          origin: 'devkit_install',
-        } as any,
-      });
-      console.log(postResponse);
-    });
+    if (!this.oAuth2Client) {
+      return;
+    }
+
+    if (this.expiresAt && this.expiresAt < Date.now()) {
+      await this.getHomeyToken();
+    }
+
+    const stream = await this.oAuth2Client.downloadApp(id, version);
+
+    await installApp(id, version, stream, this.bearerToken!, ip);
+
+    await updateApp(
+      {
+        origin: 'devkit_install',
+      },
+      id,
+      this.bearerToken!,
+      ip
+    );
   }
 
   async logout() {

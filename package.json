@@ -1,6 +1,6 @@
 {
   "name": "space.homeycommunity.app",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "app.ts",
   "scripts": {
     "build": "cd hcs_settings && npm run build && npm run delete-target && npm run copy-files && cd .. && tsc",
@@ -20,7 +20,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "athom-api": "^3.9.0",
     "emitter-io": "^1.39.0",
     "targz-glob": "^0.0.5"
   }
